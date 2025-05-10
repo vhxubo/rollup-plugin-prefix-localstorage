@@ -6,10 +6,14 @@
     "build": "rollup -c",
     "test": "jest"
   },
-  "keywords": [],
+  "keywords": [
+    "rollup",
+    "rollup-plugin",
+    "prefix-localstorage"
+  ],
   "author": "vhxubo<vhxubo@gmail.com>",
   "license": "ISC",
-  "description": "",
+  "description": "prefix all localstorage function",
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
