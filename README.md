@@ -1,11 +1,54 @@
 # rollup-plugin-prefix-localstorage
 
-prefix all localstorage function
+Prefixes localStorage `setItem`, `getItem`, and `removeItem` to avoid naming collisions.
 
-- `localStorage.getItem`
+## Usage
 
-- `localStorage.setItem`
+```js
+// rollup.config.mjs
+import prefixLocalStorage from "rollup-plugin-prefix-localstorage";
 
-- `localStorage.removeItem`
+export default {
+  input: "src/main.js",
+  output: {
+    file: "bundle.js",
+    format: "cjs",
+  },
+  plugins: [prefixLocalStorage({ prefix: "vr_" })],
+};
+```
 
-- `localStorage.key`
+```js
+// before
+export default function () {
+  const a = 1;
+  const getName = () => "v";
+  localStorage.setItem(a, a);
+  localStorage.getItem(`${a}item`);
+  localStorage.getItem("v" + a + getName());
+  localStorage.removeItem("v" + a + a);
+  const b = localStorage.getItem("v", a);
+  console.log(b);
+}
+
+// after
+function main() {
+  const a = 1;
+  const getName = () => "v";
+  localStorage.setItem("vr_" + a, a);
+  localStorage.getItem("vr_" + `${a}item`);
+  localStorage.getItem("vr_" + ("v" + a + getName()));
+  localStorage.removeItem("vr_" + ("v" + a + a));
+  localStorage.removeItem("vr_" + ("v" + a + a));
+  const b = localStorage.getItem("vr_" + "v", a);
+  console.log(b);
+}
+```
+
+## Options
+
+| Option    | Type       | Default                                          | Description                                                                     |
+| --------- | ---------- | ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `prefix`  | `string`   | `"_"`                                            | The prefix string to add to localStorage keys.                                  |
+| `include` | `string[]` | `['**/*.js', '**/*.ts', '**/*.jsx', '**/*.tsx']` | A minimatch pattern, or array of patterns, that specifies the files to include. |
+| `exclude` | `string[]` | `['**/node_modules/**', '**/dist/**']`           | A minimatch pattern, or array of patterns, that specifies the files to exclude. |

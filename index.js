@@ -3,6 +3,17 @@ import { parse } from "acorn";
 import { walk } from "estree-walker";
 import { generate } from "escodegen";
 
+/**
+ * Prefixes localStorage `setItem`, `getItem`, and `removeItem` to avoid naming collisions.
+ *
+ * @typedef {Object} PrefixLocalStorageOptions
+ * @property {string} [prefix='_'] - The prefix to add to localStorage keys. Defaults to "_".
+ * @property {string[]} [include=['**\/*.js', '**\/*.ts', '**\/*.jsx', '**\/*.tsx']] - Minimatch patterns for files to include. Defaults to all common JavaScript/TypeScript source files.
+ * @property {string[]} [exclude=['**\/node_modules\/**', '**\/dist\/**']] - Minimatch patterns for files to exclude. Defaults to excluding `node_modules` and `dist` directories.
+ *
+ * @param {PrefixLocalStorageOptions} [options={ prefix: '_', include: ['**\/*.js', '**\/*.ts', '**\/*.jsx', '**\/*.tsx'], exclude: ['**\/node_modules\/**', '**\/dist\/**'] }] - Configuration options for prefixing localStorage.
+ * @returns {void}
+ */
 export default function prefixLocalStorage(options) {
   const {
     prefix = "_",
@@ -28,15 +39,14 @@ export default function prefixLocalStorage(options) {
         walk(ast, {
           enter(node) {
             if (
-              node.type === "ExpressionStatement" &&
-              node.expression.type === "CallExpression" &&
-              node.expression.callee.type === "MemberExpression" &&
-              node.expression.callee.object.name === "localStorage" &&
+              node.type === "CallExpression" &&
+              node.callee.type === "MemberExpression" &&
+              node.callee.object.name === "localStorage" &&
               ["setItem", "getItem", "removeItem", "key"].includes(
-                node.expression.callee.property.name,
+                node.callee.property.name,
               )
             ) {
-              const firstArgument = node.expression.arguments[0];
+              const firstArgument = node.arguments[0];
               if (firstArgument) {
                 const newArgument = {
                   type: "BinaryExpression",
@@ -48,7 +58,7 @@ export default function prefixLocalStorage(options) {
                   },
                   right: firstArgument,
                 };
-                node.expression.arguments[0] = newArgument;
+                node.arguments[0] = newArgument;
                 this.replace(node);
               }
             }
