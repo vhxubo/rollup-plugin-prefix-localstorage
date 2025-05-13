@@ -1,10 +1,7 @@
 import { createFilter } from "@rollup/pluginutils";
-import { parse } from "acorn";
-import { walk } from "estree-walker";
-import { generate } from "escodegen";
 
 /**
- * Prefixes localStorage `setItem`, `getItem`, and `removeItem` to avoid naming collisions.
+ * Add a custom prefix to the `setItem`, `getItem`, and `removeItem` methods of `localStorage` to avoid naming collisions.
  *
  * @typedef {Object} PrefixLocalStorageOptions
  * @property {string} [prefix='_'] - The prefix to add to localStorage keys. Defaults to "_".
@@ -12,7 +9,7 @@ import { generate } from "escodegen";
  * @property {string[]} [exclude=['**\/node_modules\/**', '**\/dist\/**']] - Minimatch patterns for files to exclude. Defaults to excluding `node_modules` and `dist` directories.
  *
  * @param {PrefixLocalStorageOptions} [options={ prefix: '_', include: ['**\/*.js', '**\/*.ts', '**\/*.jsx', '**\/*.tsx'], exclude: ['**\/node_modules\/**', '**\/dist\/**'] }] - Configuration options for prefixing localStorage.
- * @returns {void}
+ * @returns
  */
 export default function prefixLocalStorage(options) {
   const {
@@ -31,41 +28,9 @@ export default function prefixLocalStorage(options) {
       }
 
       try {
-        const ast = parse(code, {
-          ecmaVersion: 6,
-          sourceType: "module",
-        });
-
-        walk(ast, {
-          enter(node) {
-            if (
-              node.type === "CallExpression" &&
-              node.callee.type === "MemberExpression" &&
-              node.callee.object.name === "localStorage" &&
-              ["setItem", "getItem", "removeItem", "key"].includes(
-                node.callee.property.name,
-              )
-            ) {
-              const firstArgument = node.arguments[0];
-              if (firstArgument) {
-                const newArgument = {
-                  type: "BinaryExpression",
-                  operator: "+",
-                  left: {
-                    type: "Literal",
-                    value: prefix,
-                    raw: `'${prefix}'`,
-                  },
-                  right: firstArgument,
-                };
-                node.arguments[0] = newArgument;
-                this.replace(node);
-              }
-            }
-          },
-        });
-
-        const transformedCode = generate(ast);
+        const regex =
+          /(localStorage|window\.localStorage)\.(setItem|getItem|removeItem)\(\s*/g;
+        const transformedCode = code.replace(regex, `$1.$2('${prefix}' + `);
 
         return {
           code: transformedCode,

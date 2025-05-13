@@ -1,6 +1,19 @@
 # rollup-plugin-prefix-localstorage
 
-Prefixes localStorage `setItem`, `getItem`, and `removeItem` to avoid naming collisions.
+Add a custom prefix to the `setItem`, `getItem`, and `removeItem` methods of `localStorage` to avoid naming collisions.
+
+## Install
+
+```bash
+npm install rollup-plugin-prefix-localstorage --save-dev
+```
+
+````bash
+pnpm add rollup-plugin-prefix-localstorage -D
+
+```bash
+yarn add rollup-plugin-prefix-localstorage --dev
+````
 
 ## Usage
 
@@ -37,9 +50,8 @@ function main() {
   const getName = () => "v";
   localStorage.setItem("vr_" + a, a);
   localStorage.getItem("vr_" + `${a}item`);
-  localStorage.getItem("vr_" + ("v" + a + getName()));
-  localStorage.removeItem("vr_" + ("v" + a + a));
-  localStorage.removeItem("vr_" + ("v" + a + a));
+  localStorage.getItem("vr_" + "v" + a + getName());
+  localStorage.removeItem("vr_" + "v" + a + a);
   const b = localStorage.getItem("vr_" + "v", a);
   console.log(b);
 }
