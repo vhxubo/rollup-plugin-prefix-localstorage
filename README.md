@@ -8,12 +8,13 @@ Add a custom prefix to the `setItem`, `getItem`, and `removeItem` methods of `lo
 npm install rollup-plugin-prefix-localstorage --save-dev
 ```
 
-````bash
+```bash
 pnpm add rollup-plugin-prefix-localstorage -D
+```
 
 ```bash
 yarn add rollup-plugin-prefix-localstorage --dev
-````
+```
 
 ## Usage
 
